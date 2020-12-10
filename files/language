@@ -1,0 +1,9 @@
+# Skript feito por Kiberzn
+# Discord: a-zn#4375
+
+messages:
+  without-permission: '&cVocê não tem permissão para isto.'
+  fly:
+    on-join: true
+    enabled: '&aO modo voar foi ativado!'
+    disabled: '&cO modo voar foi desativado!'
