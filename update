@@ -1,0 +1,72 @@
+# ─────────────────────────────────────────────────── #
+#                 ▒███████▒ ███▄    █     ──          #
+#                 ▒ ▒ ▒ ▄▀░ ██ ▀█   █                 #
+#     ───         ░ ▒ ▄▀▒░ ▓██  ▀█ ██▒                #
+#                   ▄▀▒   ░▓██▒  ▐▌██▒                #
+#                 ▒███████▒▒██░   ▓██░                #
+#                 ░▒▒ ▓░▒░▒░ ▒░   ▒ ▒                 #
+#                 ░░▒ ▒ ░ ▒░ ░░   ░ ▒░                #
+#                 ░ ░ ░ ░ ░   ░   ░ ░      ───        #
+#                   ░ ░             ░                 #
+#   ─             ░                                   #
+# ─────────────────────────────────────────────────── #
+options:
+#	Nome: KhVoar | Autor: Kiberzn
+	version: 1.3
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# events
+on join:
+	player has permission "khvoar.fly" or "khvoar.*":
+		{khfly::on-join} == true:
+			set player's fly mode to true
+on quit:
+	set player's fly mode to false
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# commands
+command /fly:
+	aliases: /voar
+	trigger:
+		khvoar_fly(player)
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# file manager
+function khvoar_filemanager(use: text):
+	{_use} == "value":
+		delete {khfly::*}
+		loop "enabled" and "disabled" and "on-join":
+			set {khfly::%loop-value%} to yml value "messages.fly.%loop-value%" from file "plugins/KhVoar/language.yml"
+		set {khfly::without-permission} to yml value "messages.without-permission" of file "plugins/KhVoar/language.yml"
+	{_use} == "create":
+		file "plugins/KhVoar/language.yml" doesn't exist:
+			create file "plugins/KhVoar/config.yml"
+			delete file "plugins/KhVoar/config.yml"
+			download file from "https://raw.githubusercontent.com/KickHolse/KhVoar/main/files/language" to file "plugins/KhVoar/language.yml"
+		khvoar_filemanager("value")
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# load
+function khvoar_fly(p: player):
+	{_p} has permission "khvoar.*" or "khvoar.fly":
+		{_p}'s fly mode is false:
+			set {_p}'s fly mode to true
+			send colored {khfly::enabled} to {_p}
+		else:
+			set {_p}'s fly mode to false
+			send colored {khfly::disabled} to {_p}
+	else:
+		send colored {khfly::without-permission} to {_}
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# load
+on load:
+	khvoar_filemanager("create")
+	send "&3[KHVOAR] &eChecking for updates..." to console
+	wait 2 seconds
+	text from "https://api.spigotmc.org/legacy/update.php?resource=69096" != "{@version}":
+		send "&3[KHVOAR] &cYou are not using the latest version of skript." to console
+	else:
+		send "&3[KHVOAR] &aYou are using the latest version of skript." to console
+	wait 2 seconds
+	send "&3[KHVOAR] &aKhVoar &8v{@version} &aenabled!" to console
