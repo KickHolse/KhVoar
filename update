@@ -17,6 +17,10 @@ options:
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
 # events
 on join:
+	text from "https://api.spigotmc.org/legacy/update.php?resource=69096" is not "{@version}":
+		set {khfly::check_update} to true
+		player has permission "khvoar.update" or "khvoar.*":
+			send "%nl%&3 [KhUtills] &7There is a new skript update, click <tooltip:&bClick here to update.><command:/khutills atualizar>&a&lHERE<reset> &7to update.%nl% " to player
 	player has permission "khvoar.fly" or "khvoar.*":
 		{khfly::on-join} == true:
 			set player's fly mode to true
@@ -25,6 +29,33 @@ on quit:
 
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
 # commands
+command /khvoar [<text = help>]:
+	permission: khvoar.*
+	permission message: §3[KhVoar] §7v{@version} §f- §7Criado por §6Kiberzn§7.
+	trigger:
+		arg 1 == "help":
+			send "%nl%  &eAjuda - KhVoar &71/1%nl% "
+			send "&3 /khvoar atualizar &f- &7Atualiza o skript"
+			send newline
+		arg 1 == "atualizar":
+			{khfly::check_update} == true:
+				set action bar of player to "&aConectando com o site..."
+				wait 2 second
+				set {_percent1} to 90
+				loop 90 times:
+					add 1 to {_percent2}
+					set {_percent} to {_percent2}/{_percent1}*100
+					set action bar of player to "&aBaixando arquivo... &8(%{_percent}%%%)"
+					wait a tick
+				set {_sk} to script name
+				delete file "plugins/Skript/scripts/%{_sk}%.sk"
+				delete file "plugins/KhVoar/language.yml"
+				download file from "https://raw.githubusercontent.com/KickHolse/KhVoar/main/update" to file "plugins/Skript/scripts/%{_sk}%.sk"
+				reload script "%{_sk}%"
+				play "ORB_PICKUP" to player at volume 1.0
+				set action bar of player to "&aAtualização instalada com sucesso!"
+			else:
+				send "&cO skript se encontra em sua ultima versão."
 command /fly:
 	aliases: /voar
 	trigger:
@@ -51,12 +82,12 @@ function khvoar_fly(p: player):
 	{_p} has permission "khvoar.*" or "khvoar.fly":
 		{_p}'s fly mode is false:
 			set {_p}'s fly mode to true
-			send colored {khfly::enabled} to {_p}
+			set action bar of {_p} to colored {khfly::enabled}
 		else:
 			set {_p}'s fly mode to false
-			send colored {khfly::disabled} to {_p}
+			set action bar of {_p} to colored {khfly::disabled}
 	else:
-		send colored {khfly::without-permission} to {_}
+		send colored {khfly::without-permission} to {_p}
 
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
 # load
