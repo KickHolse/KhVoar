@@ -1,1 +1,23 @@
-a
+# crafted by okick
+# hello friend :)
+
+options:
+  # List of worlds that are allowed to fly.
+  worlds:
+  - 'world'
+
+  # List of commands for fly mode.
+  aliases:
+  - 'voar'
+
+  # Define whether the player will have flying mode enabled when joining the server.
+  # 'true' or 'false'
+  join: true
+
+messages:
+  permission: '&cYou don''t have permission to run this command.'
+  no_world: '&cFlight is not permitted in this world.'
+  commands:
+    fly:
+      enabled: '&aFly mode activated successfully.'
+      disabled: '&cFly mode successfully disabled.'
