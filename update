@@ -1,103 +1,75 @@
 # ─────────────────────────────────────────────────── #
-#                 ▒███████▒ ███▄    █     ──          #
-#                 ▒ ▒ ▒ ▄▀░ ██ ▀█   █                 #
-#     ───         ░ ▒ ▄▀▒░ ▓██  ▀█ ██▒                #
-#                   ▄▀▒   ░▓██▒  ▐▌██▒                #
-#                 ▒███████▒▒██░   ▓██░                #
-#                 ░▒▒ ▓░▒░▒░ ▒░   ▒ ▒                 #
-#                 ░░▒ ▒ ░ ▒░ ░░   ░ ▒░                #
-#                 ░ ░ ░ ░ ░   ░   ░ ░      ───        #
-#                   ░ ░             ░                 #
-#   ─             ░                                   #
+#                    ██ ▄█▀  ██████                   #
+#                    ██▄█▒ ▒██    ▒                   #
+#                   ▓███▄░ ░ ▓██▄                     #
+#                   ▓██ █▄   ▒   ██▒                  #
+#                   ▒██▒ █▄▒██████▒▒                  #
+#                   ▒ ▒▒ ▓▒▒ ▒▓▒ ▒ ░                  #
+#                   ░ ░▒ ▒░░ ░▒  ░ ░                  #
+#                   ░ ░░ ░ ░  ░  ░                    #
+#                   ░  ░         ░                    #
 # ─────────────────────────────────────────────────── #
 options:
-#	Nome: KhVoar | Autor: Kiberzn
-	version: 1.3
+#	KhFly | crafted by Kick Holse
+	version: 1.4
 
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# events
-on join:
-	text from "https://api.spigotmc.org/legacy/update.php?resource=69096" is not "{@version}":
-		set {khfly::check_update} to true
-		player has permission "khvoar.update" or "khvoar.*":
-			send "%nl%&3 [KhUtills] &7There is a new skript update, click <tooltip:&bClick here to update.><command:/khutills atualizar>&a&lHERE<reset> &7to update.%nl% " to player
-	player has permission "khvoar.fly" or "khvoar.*":
-		{khfly::on-join} == true:
-			set player's fly mode to true
-on quit:
+# PERMISSIONS
+#
+# khfly.commands.fly
+# khfly.*
+
+#                  E  V  E  N  T  S                   #
+# ─────────────────────────────────────────────────── #
+join:
+	"%fly_get_worlds()%" contains "%player's world%"
+	player has permission "khfly.commands.fly" or "khfly.*"
+	yaml value "options.join" from "ks.fly.language" = true:
+		set player's fly mode to true
+quit:
 	set player's fly mode to false
+player world change:
+	"%fly_get_worlds()%" contains "%player's world%"
+	player has permission "khfly.commands.fly" or "khfly.*"
+	yaml value "options.join" from "ks.fly.language" = true:
+		set player's fly mode to true
 
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# commands
-command /khvoar [<text = help>]:
-	permission: khvoar.*
-	permission message: §3[KhVoar] §7v{@version} §f- §7Criado por §6Kiberzn§7.
+#               C  O  M  M  A  N  D  S                #
+# ─────────────────────────────────────────────────── #
+command fly [<text>]:
 	trigger:
-		arg 1 == "help":
-			send "%nl%  &eAjuda - KhVoar &71/1%nl% "
-			send "&3 /khvoar atualizar &f- &7Atualiza o skript"
-			send newline
-		arg 1 == "atualizar":
-			{khfly::check_update} == true:
-				set action bar of player to "&aConectando com o site..."
-				wait 2 second
-				set {_percent1} to 90
-				loop 90 times:
-					add 1 to {_percent2}
-					set {_percent} to {_percent2}/{_percent1}*100
-					set action bar of player to "&aBaixando arquivo... &8(%{_percent}%%%)"
-					wait a tick
-				set {_sk} to script name
-				delete file "plugins/Skript/scripts/%{_sk}%.sk"
-				delete file "plugins/KhVoar/language.yml"
-				download file from "https://raw.githubusercontent.com/KickHolse/KhVoar/main/update" to file "plugins/Skript/scripts/%{_sk}%.sk"
-				reload script "%{_sk}%"
-				play "ORB_PICKUP" to player at volume 1.0
-				set action bar of player to "&aAtualização instalada com sucesso!"
+		"%fly_get_worlds()%" contains "%player's world%":
+			player has permission "khfly.commands.fly" or "khfly.*":
+				fly_alternate_mode(player)
 			else:
-				send "&cO skript se encontra em sua ultima versão."
-command /fly:
-	aliases: /voar
-	trigger:
-		khvoar_fly(player)
-
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# file manager
-function khvoar_filemanager(use: text):
-	{_use} == "value":
-		delete {khfly::*}
-		loop "enabled" and "disabled" and "on-join":
-			set {khfly::%loop-value%} to yml value "messages.fly.%loop-value%" from file "plugins/KhVoar/language.yml"
-		set {khfly::without-permission} to yml value "messages.without-permission" of file "plugins/KhVoar/language.yml"
-	{_use} == "create":
-		file "plugins/KhVoar/language.yml" doesn't exist:
-			create file "plugins/KhVoar/config.yml"
-			delete file "plugins/KhVoar/config.yml"
-			download file from "https://raw.githubusercontent.com/KickHolse/KhVoar/main/files/language" to file "plugins/KhVoar/language.yml"
-		khvoar_filemanager("value")
-
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# load
-function khvoar_fly(p: player):
-	{_p} has permission "khvoar.*" or "khvoar.fly":
-		{_p}'s fly mode is false:
-			set {_p}'s fly mode to true
-			set action bar of {_p} to colored {khfly::enabled}
+				send yaml value "messages.permission" from "ks.fly.language"
 		else:
-			set {_p}'s fly mode to false
-			set action bar of {_p} to colored {khfly::disabled}
-	else:
-		send colored {khfly::without-permission} to {_p}
+			send yaml value "messages.no_world" from "ks.fly.language"
+command:
+	yaml list "options.aliases" from "ks.fly.language" contains command:
+		cancel event
+		make player execute command "fly"
 
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# load
-on load:
-	khvoar_filemanager("create")
-	send "&3[KHVOAR] &eChecking for updates..." to console
-	wait 2 seconds
-	text from "https://api.spigotmc.org/legacy/update.php?resource=69096" != "{@version}":
-		send "&3[KHVOAR] &cYou are not using the latest version of skript." to console
+#              F  U  N  C  T  I  O  N  S              #
+# ─────────────────────────────────────────────────── #
+function fly_get_worlds() :: objects:
+	return yaml list "options.worlds" from "ks.fly.language"
+function fly_alternate_mode(p: player):
+	{_p}'s fly mode = true:
+		set {_p}'s fly mode to false
+		send yaml value "messages.commands.fly.disabled" from "ks.fly.language" to {_p}
 	else:
-		send "&3[KHVOAR] &aYou are using the latest version of skript." to console
-	wait 2 seconds
-	send "&3[KHVOAR] &aKhVoar &8v{@version} &aenabled!" to console
+		set {_p}'s fly mode to true
+		send yaml value "messages.commands.fly.enabled" from "ks.fly.language" to {_p}
+
+#                     L  O  A  D                      #
+# ─────────────────────────────────────────────────── #
+load:
+	fileExists("plugins/KhFly/language.yml") != true:
+		create file "plugins/KhFly/language.yml"
+		delete file "plugins/KhFly/language.yml"
+		download from "https://github.com/KickHolse/KhVoar/raw/main/files/en/language" to file "plugins/KhFly/language.yml"
+	yaml "ks.fly.language" is loaded:
+		unload yaml "ks.fly.language"
+	load yaml "plugins/KhFly/language.yml" as "ks.fly.language"
+	text from "https://api.spigotmc.org/legacy/update.php?resource=69096" != "{@version}":
+		send "[KhFly] &cYou are not using the latest version of skript." to console
